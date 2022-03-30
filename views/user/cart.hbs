@@ -1,0 +1,83 @@
+<section>
+    <div class="container">
+        <div class="row mt-5">
+            <table class="table">
+                <thead>
+                    <tr>
+                        
+                        <th scope="col">Name</th>
+                        <th>Image</th>
+                        <th>Price</th>
+                        <th scope="col">Quantity</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each product}}
+                    <tr>
+                        
+                        {{#each this.cartInfo}}
+                        <td><img style="height: 50px;width: 50px" src="/product-images/{{this._id}}.jpg" alt="i"></td>
+                        <td>{{this.Name}}</td>
+                        <td>{{this.Price}}</td>
+                        {{/each}}
+                         <td>
+                            
+                             <button class="cart-item-count mr-3" onclick="changeQuantity('{{this._id}}','{{this.Item}}','{{this.user}}',-1)">-</button><span id="cart-quantity">{{this.Quantity}}</span><button class="cart-item-count ml-3" onclick="changeQuantity('{{this._id}}','{{this.Item}}','{{this.user}}',1)">+</button>
+                         </td>
+                        
+                        
+                        <td><a href="/delete-from-cart/{{this.Item}}" class="btn btn-danger">Delete</a></td>
+                        
+                    </tr>
+                    {{/each}}
+                    <hr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        
+                        <td class="ml-auto"><h3>Total Price:Rs<span id="cart-total">{{this.total}}</span></h3></td>
+                        <td><a href="/checkout" class="btn btn-secondary">Buy Now</a></td>
+                    </tr>
+                    
+                    </tbody>
+                     
+            </table>
+             
+        </div>
+
+                       
+
+    </div>
+</section>
+<script>
+   function changeQuantity(cartId,proId,userId,count) {
+       
+       let quantity=parseInt(document.getElementById('cart-quantity').innerHTML)
+       let total=parseInt(document.getElementById('cart-total').innerHTML)
+      $.ajax({
+          url:'/change-product-quantity',
+          data:{
+              cart:cartId,
+              product:proId,
+              user:userId,
+              count:count,
+              quantity:quantity
+          },
+          method:'post',
+          success:(response)=>{
+              if(response.removeProduct){
+                 alert("product removed")
+                 location.reload()
+              }
+              else{
+                  document.getElementById('cart-quantity').innerHTML=quantity+count
+                  document.getElementById('cart-total').innerHTML=response.total
+
+              }
+          }
+      })
+   }
+   
+</script>

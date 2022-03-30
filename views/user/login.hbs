@@ -1,0 +1,28 @@
+<section>
+    <div class="container">
+    <form action="/login" method="post" class="col-md-4 ml-4">
+    {{#if loginErr}}
+        <p class="error">{{loginErr}}</p>
+    {{/if}}
+        <label for="">Email</label>
+        <input type="email" class="form-control" name="Email">
+        <label for="">Password</label>
+        <input type="password" class="form-control" name="Password">
+        <!--
+    
+        <div class="form-group">
+            <label for="inputEmail">Email :</label>
+            <input type="email" id="inputEmail" class="form-comtrol">
+        </div>
+        <div class="form-group">
+            <label for="">Password :</label>
+            <input type="password" name="Password" class="form-control">
+        </div>
+        -->
+        <div class="row m-4">
+            <a href="/signup"><h6>dont have an account?</h6></a>
+            <button type="submit" class="btn btn-success ml-auto">Login</button>
+        </div>
+    </form>
+    </div>
+</section>
