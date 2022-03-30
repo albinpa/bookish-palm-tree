@@ -283,11 +283,11 @@ module.exports={
             state:status
         }
         return new Promise((resolve,reject)=>{
-           db.get().collection('order').insertOne(orderObj).then((order)=>{
-            
-                resolve(order.ops[0])
+             db.get().collection('order').insertOne(orderObj).then((order)=>{
+                 console.log(order.ops[0])
+                    resolve(order.ops[0])
+                })
             })
-        })
     },
     generateRazorpay:(order)=>{
         let orderId=order._id

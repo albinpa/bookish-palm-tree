@@ -114,12 +114,15 @@ router.post('/order-submission',async(req,res)=>{
   let product=await userHelper.getCartItems(orderDetails.user)
    let total =await userHelper.getTotalPrice(orderDetails.user)
   userHelper.addOrder(orderDetails,product,total).then((response)=>{
-    console.log(response._id)
-    if(response.state==='pending'){
-    res.json({codSuccess:true})
+    console.log(response)
+    console.log(response.state)
+    if(response.state=='placed'){
+      console.log("gfiu")
+    res.json(response.placed=true)
     }else{
+      console.log("haaaa")
       userHelper.generateRazorpay(response)
-      console.log(response)
+      console.log(response+"haii")
       res.json(response)
     }
   })
@@ -138,8 +141,13 @@ router.post('/shipping-address',(req,res)=>{
 });
 router.post('/verify-payment',(req,res)=>{
   console.log(req.body)
+});
+router.get('/order',verifyLogin,(req,res)=>{
+  res.render('user/order',{user})
 })
-
+router.post('/order',(req,res)=>{
+  res.redirect('/order')
+})
 
 
 module.exports = router;

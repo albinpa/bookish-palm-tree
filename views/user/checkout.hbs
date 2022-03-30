@@ -18,8 +18,8 @@
                <h4>Payment method</h4> 
                <div>
                     <form action="" id="checkout-form"> 
-                        <input class=" ml-auto" type="radio" name="paymentmethod" value="COD">
-                        <input class=" ml-2" type="radio" name="paymentmethod" value="UPI">
+                        <input type="radio" name="paymentmethod" value="COD" required>
+                        <input type="radio" name="paymentmethod" value="UPI" required>
                         <input type="hidden" name="addr" value="{{shipAdd._id}}">
                         <input type="hidden" name="user" value="{{shipAdd.user}}">
                         <button class="btn btn-success" type="submit">Place Order</button>
@@ -45,64 +45,20 @@
    
 
 <script>
-        $("#checkout-form").submit((e)=>{
+    
+    $("#checkout-form").submit((e)=>{
         e.preventDefault()
         $.ajax({
             url:'/order-submission',
             method:'post',
             data:$('#checkout-form').serialize(),
             success:(response)=>{
-                alert(response)
-                if(response.codSuccess){
-                    location.href='/'
+                if(response.placed=true){
+                    alert("true")
                 }else{
-                    razorpayPayment(response)
+                    alert("false")
                 }
             }
         })
-    });
-    function razorpayPayment(order) {
-        var options = {
-    "key": "rzp_test_doMzYab1IL4mLl", // Enter the Key ID generated from the Dashboard
-    "amount": order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-    "currency": "INR",
-    "name": "Albin testrun",
-    "description": "Test Transaction",
-    "image": "",
-    "order_id": order._id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-    "handler": function (response){
-        alert(response.razorpay_payment_id);
-        alert(response.razorpay_order_id);
-        alert(response.razorpay_signature);
-
-        verifyPayment(response,order);
-    },
-    "prefill": {
-        "name": "Gaurav Kumar",
-        "email": "gaurav.kumar@example.com",
-        "contact": "9999999999"
-    },
-    "notes": {
-        "address": "Razorpay Corporate Office"
-    },
-    "theme": {
-        "color": "#007bff"
-    }
-
-    };
-      var rzp1 = new Razorpay(options);
-      rzp1.open();
-     function verifyPayment(payment,order) {
-     $.ajax({
-         url:'/verify-payment',
-         method:'post',
-         data:{
-              payment:payment,
-               order:order
-         },
-         
-         }
-     });
-     };
-
+    })
 </script>
