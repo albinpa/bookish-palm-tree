@@ -69,12 +69,15 @@ router.get('/logout', function(req, res){
 router.get('/cart',verifyLogin,async (req, res)=>{
   let user=req.session.user
   let product=await userHelper.getCartItems(req.session.user._id)
-  let cartId=(product)
-  
-  let total=await userHelper.getTotalPrice(req.session.user._id)
-  console.log(total)
-  
-    res.render('user/cart',{product,user,total}) 
+
+  let total=0
+  if(product.length>0){
+    tValue=true
+    total=await userHelper.getTotalPrice(req.session.user._id)
+  }else{
+    tValue=false
+  }
+  res.render('user/cart',{product,user,total,tValue}) 
     
 });
 router.get('/add-to-cart/:id',(req,res)=>{
@@ -103,6 +106,7 @@ router.post('/change-product-quantity',(req,res,next)=>{
 });
 router.get('/checkout',verifyLogin,async(req,res)=>{
   user=req.session.user
+  
   total =await userHelper.getTotalPrice(user._id)
   let shipAdd=await userHelper.getShipAdd(user._id)
   res.render('user/checkout',{user,total,shipAdd})
@@ -114,16 +118,15 @@ router.post('/order-submission',async(req,res)=>{
   let product=await userHelper.getCartItems(orderDetails.user)
    let total =await userHelper.getTotalPrice(orderDetails.user)
   userHelper.addOrder(orderDetails,product,total).then((response)=>{
-    console.log(response)
-    console.log(response.state)
+
+    
     if(response.state=='placed'){
-      console.log("gfiu")
-    res.json(response.placed=true)
+    res.json({codsuccess:true})
     }else{
-      console.log("haaaa")
-      userHelper.generateRazorpay(response)
-      console.log(response+"haii")
-      res.json(response)
+      userHelper.generateRazorpay(response).then((response)=>{
+         res.json(response)
+       })
+      
     }
   })
   
@@ -141,8 +144,17 @@ router.post('/shipping-address',(req,res)=>{
 });
 router.post('/verify-payment',(req,res)=>{
   console.log(req.body)
+  userHelper.verifyPayment(req.body).then(()=>{
+    userHelper.changePayState(req.body['order[receipt]']).then(()=>{
+      res.json({status:true})
+    })
+  }).catch((err)=>{
+    console.log(err)
+    res.json({status:false,err})
+  })
 });
 router.get('/order',verifyLogin,(req,res)=>{
+  user=req.session.user
   res.render('user/order',{user})
 })
 router.post('/order',(req,res)=>{

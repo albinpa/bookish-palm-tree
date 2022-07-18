@@ -53,12 +53,73 @@
             method:'post',
             data:$('#checkout-form').serialize(),
             success:(response)=>{
-                if(response.placed=true){
-                    alert("true")
+                if(response.codsuccess){
+                    
+                    location.href='/order'
+
                 }else{
-                    alert("false")
+                    
+                    
+                    razorpayPayment(response)
                 }
             }
         })
+        
     })
+    function razorpayPayment(order) {
+       
+       
+       let amount=parseInt(order.amount*100)
+       
+        
+        let options={
+            "key": "rzp_test_doMzYab1IL4mLl", // Enter the Key ID generated from the Dashboard
+            "amount":amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+            "currency": "INR",
+            "name": "Albin testrun",
+            "description": "Test Transaction",
+            "image": "",
+            "order_id": order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+            "handler": function (response){
+                  
+                      
+
+                      verifyPayment(response,order);
+             },
+             "prefill": {
+             "name": "Gaurav Kumar",
+             "email": "gaurav.kumar@example.com",
+             "contact": "9999999999"
+             },
+             "notes": {
+             "address": "Razorpay Corporate Office"
+             },
+             "theme": {
+             "color": "#007bff"
+             }
+        }
+        let rzp1 = new Razorpay(options);
+        rzp1.open();
+    }
+    function verifyPayment(payment,order){
+        $.ajax({
+            url:'/verify-payment',
+            method:'post',
+            data:{
+                payment,order
+            },
+            success:(response)=>{
+                
+                console.log(response)
+                if(response.status){
+                    location.href='/order'
+                }else{
+                    alert("Payment failed")
+                }
+                
+                
+            }
+        })
+    }
+    
 </script>

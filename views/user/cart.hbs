@@ -36,9 +36,13 @@
                         <td></td>
                         <td></td>
                         <td></td>
-                        
+                          {{#if tValue}}
                         <td class="ml-auto"><h3>Total Price:Rs<span id="cart-total">{{this.total}}</span></h3></td>
                         <td><a href="/checkout" class="btn btn-secondary">Buy Now</a></td>
+                         {{else}}
+                         <td></td>
+                         <td></td>
+                         {{/if}}
                     </tr>
                     
                     </tbody>

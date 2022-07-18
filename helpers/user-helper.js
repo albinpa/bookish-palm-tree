@@ -55,7 +55,7 @@ module.exports={
             if(userCart){
 
                 let proExist=userCart.productList.findIndex(product=>product.Item==proId)
-                console.log(proExist);
+                
                 if(proExist!=-1){
 
                     db.get().collection('cart').updateOne({'user':objectIduser,'productList.Item':objectIdpro},{
@@ -136,7 +136,7 @@ module.exports={
     },
     deleteFromCart:(proId,userId)=>{
         return new Promise((resolve,reject)=>{
-            console.log(proId);
+            
              let objectIdpro=new ObjectID(proId)
              let objectIduser=new ObjectID(userId)
         
@@ -177,6 +177,7 @@ module.exports={
     getTotalPrice:(userId)=>{
         return new Promise(async(resolve,reject)=>{
             let objectIduser=new ObjectID(userId)
+            
             
             
          let cartItems=await db.get().collection('cart').aggregate([
@@ -262,6 +263,9 @@ module.exports={
         })
     },
     addOrder:(orderData,product,total)=>{
+        console.log(orderData)
+        console.log(product[0])
+
         let proDetails=product[0]
         let paymentmethod=orderData.paymentmethod
         let shipping=orderData.addr
@@ -284,6 +288,9 @@ module.exports={
         }
         return new Promise((resolve,reject)=>{
              db.get().collection('order').insertOne(orderObj).then((order)=>{
+                 db.get().collection('cart').updateOne({user:objectIduser},{
+                     $pull:{productList:{Item:objectIdpro,Quantity:quantity}}
+                 })
                  console.log(order.ops[0])
                     resolve(order.ops[0])
                 })
@@ -291,16 +298,13 @@ module.exports={
     },
     generateRazorpay:(order)=>{
         let orderId=order._id
-        let total =parseFloat(order.total)
+        let total =parseInt(order.total)
           return new Promise((resolve,reject)=>{
               let options={
                 amount:total,
                 currency: "INR",
-                receipt:""+orderId,
-                notes: {
-                  key1: "value3",
-                  key2: "value2"
-                }
+                receipt:""+orderId
+                
               }
         
 
@@ -308,12 +312,36 @@ module.exports={
                 if(err){
                     console.log(err)
                 }else{
-                console.log(order)
+                    
+                
                 resolve(order)
                 }
             })
             
           })
+    },
+    verifyPayment:(order)=>{
+        return new Promise((resolve,reject)=>{
+            const crypto = require('crypto');
+            let hmac = crypto.createHmac('sha256', 'cpZCALFy9qfyFxfqEXzKAUiz');
+            hmac.update(order['payment[razorpay_order_id]']+"|"+order['payment[razorpay_payment_id]']);
+            hmac=hmac.digest('hex')
+            if(hmac=order['payment[razorpay_signature]']){
+                resolve()
+            }else{
+                reject()
+            }
+        })
+    },
+    changePayState:(orderId)=>{
+        return new Promise((resolve,reject)=>{
+            let objectIdord=new ObjectID(orderId)
+            db.get().collection('order').updateOne({_id:objectIdord},{
+                $set:{state:'placed'}
+            }).then(()=>{
+                resolve()
+            })
+        })
     }
     
 
